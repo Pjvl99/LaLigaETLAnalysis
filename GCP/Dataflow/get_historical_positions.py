@@ -3,6 +3,8 @@ import numpy as np
 import pyarrow
 import apache_beam as beam
 
+bucket_name = "trim-heaven-415202"
+
 class Getting_historical_positions(beam.DoFn):
     
     def process(self, element):
@@ -27,10 +29,10 @@ class Getting_historical_positions(beam.DoFn):
         element['season'] = season
         return element
     
-output_gcs = 'gs://trim-heaven-415202/laliga_output/historical_position/historical_positions_by_team'
+output_gcs = f'gs://{bucket_name}/laliga_output/historical_position/historical_positions_by_team'
 with beam.Pipeline(options=PipelineOptions()) as p: 
     df = (p 
-     | 'Read parquet' >> beam.io.ReadFromParquetBatched(f"gs://trim-heaven-415202/laliga/historical_position/*")
+     | 'Read parquet' >> beam.io.ReadFromParquetBatched(f"gs://{bucket_name}/laliga/historical_position/*")
      | 'Convert to pandas' >> beam.Map(lambda table: table.to_pandas())
      | 'Transform Columns' >> beam.ParDo(Getting_historical_positions())
      | 'Uploading to GCS' >> beam.io.WriteToParquet(output_gcs, pyarrow.schema(

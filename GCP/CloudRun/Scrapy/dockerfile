@@ -2,6 +2,8 @@ FROM ubuntu:22.04
 RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker
 RUN echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
 ARG DEBIAN_FRONTEND=noninteractive
+ARG BUCKET_NAME=
+ARG PROJECT_ID=
 RUN apt-get update \
   && apt install python3 python3-pip -y \
   && rm -rf /var/lib/apt/lists/*

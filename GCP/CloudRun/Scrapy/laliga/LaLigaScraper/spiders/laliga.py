@@ -1,13 +1,16 @@
 import scrapy
 import pandas as pd
 from google.cloud import storage
+import os
 
 class LaLiga(scrapy.Spider):
 
     name = "laliga"
+    project_id = os.environ["PROJECT_ID"]
+    bucket_value = os.environ["BUCKET_NAME"]
     start_urls = ["https://es.wikipedia.org/wiki/Primera_Divisi%C3%B3n_de_Espa%C3%B1a"]
-    client = storage.Client(project="trim-heaven-415202")
-    bucket = client.bucket("trim-heaven-415202")
+    client = storage.Client(project=project_id)
+    bucket = client.bucket(bucket_value)
 
     def parse(self, response):
         if response.status == 200:

@@ -4,6 +4,8 @@ import pandas as pd
 import pyarrow
 import apache_beam as beam
 
+bucket_name = "trim-heaven-415202"
+
 class Getting_historical_scorers(beam.DoFn):
     
     def __init__(self):
@@ -42,10 +44,10 @@ class Getting_historical_scorers(beam.DoFn):
         element['real_position'] = range(1, len(element['goals'])+1)
         return element
 
-output_gcs = 'gs://trim-heaven-415202/laliga_output/scorers/historical_scorers'
+output_gcs = f'gs://{bucket_name}/laliga_output/scorers/historical_scorers'
 with beam.Pipeline(options=PipelineOptions()) as p: 
     df = (p 
-     | 'Read parquet' >> beam.io.ReadFromParquetBatched(f"gs://trim-heaven-415202/laliga/scorers/*")
+     | 'Read parquet' >> beam.io.ReadFromParquetBatched(f"gs://{bucket_name}/laliga/scorers/*")
      | 'Convert to pandas' >> beam.Map(lambda table: table.to_pandas())
      | 'Transform Columns' >> beam.ParDo(Getting_historical_scorers())
      | 'Uploading to GCS' >> beam.io.WriteToParquet(output_gcs, pyarrow.schema(

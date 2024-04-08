@@ -4,6 +4,8 @@ from google.cloud import storage
 import pyarrow
 import apache_beam as beam
 
+bucket_name = "trim-heaven-415202"
+
 class Getting_historical_classification(beam.DoFn):
     
     def __init__(self):
@@ -63,12 +65,12 @@ class Getting_historical_classification(beam.DoFn):
         
     def setup(self):
         client = storage.Client()
-        self.bucket = client.bucket("trim-heaven-415202")
+        self.bucket = client.bucket(bucket_name)
             
-output_gcs = 'gs://trim-heaven-415202/laliga_output/hitorical_classification/classification'
+output_gcs = f'gs://{bucket_name}/laliga_output/hitorical_classification/classification'
 with beam.Pipeline(options=PipelineOptions()) as p: 
     df = (p 
-     | 'Read parquet' >> beam.io.ReadFromParquetBatched(f"gs://trim-heaven-415202/laliga/classification/*")
+     | 'Read parquet' >> beam.io.ReadFromParquetBatched(f"gs://{bucket_name}/laliga/classification/*")
      | 'Convert to pandas' >> beam.Map(lambda table: table.to_pandas())
      | 'Transform dataframes' >> beam.ParDo(Getting_historical_classification())
      | 'Uploading to GCS' >> beam.io.WriteToParquet(output_gcs, pyarrow.schema(
